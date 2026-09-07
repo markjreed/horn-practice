@@ -1,0 +1,2 @@
+%.pdf: %.list
+	./mksetlist.sh "$*"
