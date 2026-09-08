@@ -2,8 +2,17 @@
 root=GDrive
 folders=("Baritone B.C. (& Euphonium)" "Trombone")
 subfolders=("" "Other Music - Archived, Summer, Etc.")
+declare -A required=([rclone]=rclone [pdfunite]=poppler)
 local='numbers'
 main() {
+    for command in "${!required[@]}"; do
+        if [[ ! -x $(command -v "$command") ]]; then
+            brew install "${required[$command]}"
+            if [[ $command = rclone ]]; then
+                rclone config
+            fi
+        fi
+    done
     local name=$1
     exec 3<"$name.list" || die "$name.list not found\n"
     mkdir -p "$name"
@@ -19,6 +28,9 @@ main() {
                     mapfile -O "${#matches[@]}" -t matches < <(
                         rclone lsf "$remote" | sed "s|^|${remote//&/\\&}/|" | grep "$title")
                 done
+                if (( ${#matches[@]} )); then
+                    break
+                fi
             done
             if (( ${#matches[@]} == 1 )); then
                 match=${matches[0]}
@@ -31,7 +43,7 @@ main() {
                 done
             fi
             rclone copy "$match" "$local/"
-            f=$local/$match
+            f=$local/${match##*/}
         fi
         ln "$f" "$(printf %s/%02d-%s.pdf "$name" "$number" "$title")" 
         (( number++ ))
