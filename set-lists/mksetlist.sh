@@ -2,7 +2,8 @@
 root=GDrive
 folders=("Baritone B.C. (& Euphonium)" "Trombone")
 subfolders=("" "Other Music - Archived, Summer, Etc.")
-declare -A required=([rclone]=rclone [pdfunite]=poppler)
+declare -A required=([rclone]=rclone [pdfunite]=poppler [qpdf]=qpdf)
+declare -A rotated=([Takedown]=-)
 local='numbers'
 main() {
     for command in "${!required[@]}"; do
@@ -16,7 +17,7 @@ main() {
     local name=$1
     exec 3<"$name.list" || die "$name.list not found\n"
     mkdir -p "$name"
-    local number=1 files folder f matches remote subfolder
+    local number=1 files folder f matches remote subfolder pat
     while IFS= read -u3 -r title; do
         mapfile -t files < <(printf '%s\n' "$local/$title"*)
         f=${files[0]}
@@ -44,6 +45,11 @@ main() {
             fi
             rclone copy "$match" "$local/"
             f=$local/${match##*/}
+            for pat in "${!rotated[@]}"; do
+                if [[ $match = *$pat* ]]; then
+                    qpdf "$f" --rotate=${rotated[$pat]}90:1-z --replace-input
+                fi
+            done
         fi
         ln "$f" "$(printf %s/%02d-%s.pdf "$name" "$number" "$title")" 
         (( number++ ))
