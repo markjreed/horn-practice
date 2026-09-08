@@ -47,7 +47,13 @@ main() {
             f=$local/${match##*/}
             for pat in "${!rotated[@]}"; do
                 if [[ $match = *$pat* ]]; then
-                    qpdf "$f" --rotate=${rotated[$pat]}90:1-z --replace-input
+                    local dir=${rotated[$pat]} angle
+                    if [[ $dir = 2 ]]; then
+                        angle=+180
+                    else
+                        angle=${dir}90
+                    fi
+                    qpdf "$f" --rotate=${angle}:1-z --replace-input
                 fi
             done
         fi
