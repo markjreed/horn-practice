@@ -3,7 +3,7 @@ root=GDrive
 folders=("Baritone B.C. (& Euphonium)" "Trombone")
 subfolders=("" "Other Music - Archived, Summer, Etc.")
 declare -A required=([rclone]=rclone [pdfunite]=poppler [qpdf]=qpdf)
-declare -A rotated=()
+declare -A rotated=([Takedown]=-)
 local='numbers'
 main() {
     for command in "${!required[@]}"; do
