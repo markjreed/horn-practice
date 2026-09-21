@@ -3,7 +3,7 @@ root=GDrive
 folders=("Baritone B.C. (& Euphonium)" "Trombone")
 subfolders=("" "Other Music - Archived, Summer, Etc.")
 declare -A required=([rclone]=rclone [pdfunite]=poppler [qpdf]=qpdf)
-declare -A rotated=([Takedown]=-)
+declare -A rotated=()
 local='numbers'
 main() {
     for command in "${!required[@]}"; do
@@ -27,7 +27,7 @@ main() {
                 for subfolder in "${subfolders[@]}"; do
                     remote="$root:$folder${subfolder:+/$subfolder}"
                     mapfile -O "${#matches[@]}" -t matches < <(
-                        rclone lsf "$remote" | sed "s|^|${remote//&/\\&}/|" | grep "$title")
+                        rclone lsf "$remote" | sed "s|^|${remote//&/\\&}/|" | grep -i "$title")
                 done
                 if (( ${#matches[@]} )); then
                     break
