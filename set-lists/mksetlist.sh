@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 root=GDrive
-folders=("Baritone B.C. (& Euphonium)" "Trombone")
+folders=("Baritone B.C. (& Euphonium)" "Baritone T.C." "Trombone")
 subfolders=("" "Other Music - Archived, Summer, Etc.")
 declare -A required=([rclone]=rclone [pdfunite]=poppler [qpdf]=qpdf)
 declare -A rotated=([Takedown]=-)
@@ -19,15 +19,18 @@ main() {
     mkdir -p "$name"
     local number=1 files folder f matches remote subfolder pat
     while IFS= read -u3 -r title; do
-        mapfile -t files < <(printf '%s\n' "$local/$title"*)
+        local pattern=${title// /[_ ]}
+        pattern=${pattern//\'/[_\']}
+        mapfile -t files < <(compgen -G "$local/$pattern*")
         f=${files[0]}
         if [[ ! -r "$f" ]]; then
+            echo "not found"
             matches=()
             for folder in "${folders[@]}"; do
                 for subfolder in "${subfolders[@]}"; do
                     remote="$root:$folder${subfolder:+/$subfolder}"
                     mapfile -O "${#matches[@]}" -t matches < <(
-                        rclone lsf "$remote" | sed "s|^|${remote//&/\\&}/|" | grep -i "$title")
+                        rclone lsf "$remote" | sed "s|^|${remote//&/\\&}/|" | grep -i "$pattern")
                 done
                 if (( ${#matches[@]} )); then
                     break
