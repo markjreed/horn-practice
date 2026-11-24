@@ -24,7 +24,6 @@ main() {
         mapfile -t files < <(compgen -G "$local/$pattern*")
         f=${files[0]}
         if [[ ! -r "$f" ]]; then
-            echo "not found"
             matches=()
             for folder in "${folders[@]}"; do
                 for subfolder in "${subfolders[@]}"; do
@@ -60,7 +59,7 @@ main() {
                 fi
             done
         fi
-        ln "$f" "$(printf %s/%02d-%s.pdf "$name" "$number" "$title")" 
+        ln -f "$f" "$(printf %s/%02d-%s.pdf "$name" "$number" "$title")" 
         (( number++ ))
     done
     pdfunite "$name"/*.pdf "$name.pdf" && rm -rf "$name"
